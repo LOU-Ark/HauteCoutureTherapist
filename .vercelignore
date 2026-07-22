@@ -1,0 +1,16 @@
+# Vercel には「セラピスト向け顧客管理アプリ（product/）」だけをデプロイする。
+# 生成アプリ用の管理ポータルや開発用サーバは配信対象に含めない。
+
+# 管理ポータル・ドキュメント一式（社内向け。公開不要）
+management/
+
+# 開発用ランチパッド（トップは product/index.html にするため除外）
+/index.html
+
+# ローカル開発専用のブリッジサーバと browser-sync 設定
+server/
+bs-config.cjs
+
+# 依存関係・リポジトリ説明
+node_modules/
+/README.md

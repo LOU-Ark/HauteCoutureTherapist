@@ -1,0 +1,7 @@
+{
+  "cleanUrls": true,
+  "outputDirectory": "product",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/product/$1" }
+  ]
+}

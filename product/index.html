@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>セラピスト向け顧客管理アプリ</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>セラピスト向け顧客管理</h1>
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.2); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-glass); backdrop-filter: blur(10px);">
+            <span style="font-size: 0.75rem; color: var(--text-secondary);">🌙</span>
+            <input type="range" id="theme-slider" min="0" max="100" value="0" style="width: 60px; height: 4px; accent-color: var(--accent-cyan); cursor: pointer;" title="テーマ調整">
+            <span style="font-size: 0.75rem; color: var(--text-secondary);">☀️</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- ビュー切り替えスイッチ -->
+        <div class="view-switcher" style="display: flex; gap: 8px; margin-bottom: 8px; background: rgba(0,0,0,0.15); padding: 4px; border-radius: 12px; border: 1px solid var(--border-glass);">
+            <button id="btn-view-list" style="flex: 1; padding: 10px; border-radius: 8px; border: none; background: var(--accent-cyan); color: #000; font-weight: 600; cursor: pointer; transition: var(--transition-smooth);">👥 顧客一覧</button>
+            <button id="btn-view-calendar" style="flex: 1; padding: 10px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 500; cursor: pointer; transition: var(--transition-smooth);">📅 カレンダー</button>
+        </div>
+
+        <div class="workspace-grid">
+            <!-- 左カラム: 一覧 or カレンダー -->
+            <div class="workspace-column-left">
+                <!-- 検索・追加エリア -->
+                <section class="search-container" id="search-container-section">
+                    <input type="text" id="search-input" class="search-input" placeholder="名前・かなで検索...">
+                    <div style="display: flex; align-items: center; gap: 4px; margin-right: 8px; margin-left: 4px;">
+                        <input type="checkbox" id="check-show-archived" style="width: 14px; height: 14px; cursor: pointer;">
+                        <label for="check-show-archived" style="font-size: 0.75rem; color: var(--text-secondary); cursor: pointer; white-space: nowrap;">アーカイブ表示</label>
+                    </div>
+                    <button id="btn-add-customer" class="btn-primary">
+                        <span style="font-size: 1.2rem;">＋</span> 顧客登録
+                    </button>
+                    <button id="btn-demo-guide" class="btn-secondary" style="background: rgba(0, 242, 254, 0.15); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: var(--transition-smooth);">
+                        💡 使い方デモ
+                    </button>
+                </section>
+
+                <!-- 顧客一覧リスト -->
+                <section class="customer-list" id="customer-list-container">
+                    <!-- 動的に顧客カードが追加されます -->
+                </section>
+
+                <!-- カレンダービューエリア (初期値は非表示) -->
+                <section id="calendar-view-container" style="display: none;" class="calendar-view-section">
+                    <div class="calendar-header">
+                        <button id="calendar-prev-btn" class="calendar-nav-btn">&larr;</button>
+                        <div id="calendar-month-title" class="calendar-title">2026年 7月</div>
+                        <button id="calendar-next-btn" class="calendar-nav-btn">&rarr;</button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-weekday">日</div>
+                        <div class="calendar-weekday">月</div>
+                        <div class="calendar-weekday">火</div>
+                        <div class="calendar-weekday">水</div>
+                        <div class="calendar-weekday">木</div>
+                        <div class="calendar-weekday">金</div>
+                        <div class="calendar-weekday">土</div>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid-body">
+                        <!-- JSで動的にカレンダーセルを描画します -->
+                    </div>
+                    <div id="calendar-day-details" class="calendar-visits-list" style="display: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-glass); padding-bottom: 8px;">
+                            <h3 id="calendar-details-title" style="font-size: 1.05rem; font-weight: 700; margin: 0;">7月20日の記録</h3>
+                            <button id="btn-calendar-add-record" class="btn-primary" style="display: none; padding: 6px 12px; font-size: 0.8rem;">＋ 記録追加</button>
+                        </div>
+
+                        <!-- [MINOR v1.6.0] カレンダー直結型クイックインライン記録フォーム -->
+                        <div id="calendar-inline-form-container" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass); border-radius: 16px; padding: 14px; margin-bottom: 16px;">
+                            <h4 style="font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; color: var(--accent-cyan); display: flex; align-items: center; gap: 4px;">✍️ この日の施術記録を追加</h4>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    <div style="flex: 1; min-width: 140px;">
+                                        <span style="font-size: 0.75rem; color: var(--text-secondary);">対象顧客</span>
+                                        <select id="inline-record-customer-id" class="form-control" style="width: 100%; padding: 8px; font-size: 0.85rem; margin-top: 2px;"></select>
+                                    </div>
+                                    <div style="flex: 1; min-width: 140px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                            <span style="font-size: 0.75rem; color: var(--text-secondary);">プラン選択</span>
+                                            <button type="button" class="btn-manage-plans" style="background: rgba(0, 243, 255, 0.1); border: 1px solid rgba(0, 243, 255, 0.3); color: var(--accent-cyan); font-size: 0.65rem; cursor: pointer; padding: 2px 6px; border-radius: 4px;">プラン編集</button>
+                                        </div>
+                                        <select id="inline-select-plan" class="form-control" style="width: 100%; padding: 8px; font-size: 0.85rem;"></select>
+                                    </div>
+                                    <div style="flex: 1.5; min-width: 160px;">
+                                        <span style="font-size: 0.75rem; color: var(--text-secondary);">施術メニュー</span>
+                                        <input type="text" id="inline-record-type" class="form-control" placeholder="例: アロマ 60分" style="width: 100%; padding: 8px; font-size: 0.85rem; margin-top: 2px;">
+                                    </div>
+                                    <div style="width: 110px;">
+                                        <span style="font-size: 0.75rem; color: var(--text-secondary);">金額 (円)</span>
+                                        <input type="number" id="inline-record-amount" class="form-control" placeholder="例: 8000" style="width: 100%; padding: 8px; font-size: 0.85rem; margin-top: 2px;">
+                                    </div>
+                                </div>
+
+                                <!-- 詳細項目（アコーディオン） -->
+                                <details style="margin-top: 4px;">
+                                    <summary style="font-size: 0.8rem; color: var(--text-secondary); cursor: pointer; user-select: none; padding: 4px 0;">📝 詳細メモを入力する（時間・訴え・処方等）</summary>
+                                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px; padding-top: 8px; border-top: 1px dashed var(--border-glass);">
+                                        <div style="display: flex; gap: 8px;">
+                                            <div style="flex: 1;">
+                                                <span style="font-size: 0.75rem; color: var(--text-secondary);">時間帯</span>
+                                                <select id="inline-record-time" class="form-control" style="width: 100%; padding: 8px; font-size: 0.85rem; margin-top: 2px;">
+                                                    <option value="">-- 時間を選択 --</option>
+                                                    <option value="10:00">10:00</option>
+                                                    <option value="10:30">10:30</option>
+                                                    <option value="11:00">11:00</option>
+                                                    <option value="11:30">11:30</option>
+                                                    <option value="12:00">12:00</option>
+                                                    <option value="12:30">12:30</option>
+                                                    <option value="13:00">13:00</option>
+                                                    <option value="13:30">13:30</option>
+                                                    <option value="14:00">14:00</option>
+                                                    <option value="14:30">14:30</option>
+                                                    <option value="15:00">15:00</option>
+                                                    <option value="15:30">15:30</option>
+                                                    <option value="16:00">16:00</option>
+                                                    <option value="16:30">16:30</option>
+                                                    <option value="17:00">17:00</option>
+                                                    <option value="17:30">17:30</option>
+                                                    <option value="18:00">18:00</option>
+                                                    <option value="14:00 - 15:00">14:00 - 15:00 (1時間)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span style="font-size: 0.75rem; color: var(--text-secondary);">顧客からの訴え</span>
+                                            <textarea id="inline-record-complaint" class="form-control" placeholder="例: 肩こり、首の重だるさ" style="width: 100%; padding: 8px; font-size: 0.85rem; height: 50px; min-height: 50px; margin-top: 2px; resize: vertical;"></textarea>
+                                        </div>
+                                        <div>
+                                            <span style="font-size: 0.75rem; color: var(--text-secondary);">本日の処方</span>
+                                            <textarea id="inline-record-prescription" class="form-control" placeholder="例: 首と肩のリンパを流すアプローチ" style="width: 100%; padding: 8px; font-size: 0.85rem; height: 50px; min-height: 50px; margin-top: 2px; resize: vertical;"></textarea>
+                                        </div>
+                                        <div>
+                                            <span style="font-size: 0.75rem; color: var(--text-secondary);">施術後のメモ</span>
+                                            <textarea id="inline-record-note" class="form-control" placeholder="例: 首の付け根が非常に硬かった" style="width: 100%; padding: 8px; font-size: 0.85rem; height: 50px; min-height: 50px; margin-top: 2px; resize: vertical;"></textarea>
+                                        </div>
+                                    </div>
+                                </details>
+
+                                <button type="button" id="btn-inline-submit-record" class="btn-primary" style="padding: 10px; font-size: 0.9rem; margin-top: 6px; width: 100%;">この記録を保存する</button>
+                            </div>
+                        </div>
+
+                        <div id="calendar-visits-container">
+                            <!-- 動的にその日の来店記録がリスト表示されます -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 右カラム: 顧客詳細 -->
+            <div class="workspace-column-right">
+                <!-- 顧客詳細ビュー (未選択時は非表示) -->
+                <section class="detail-view" id="customer-detail-view" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <h2 id="detail-name" style="font-size: 1.4rem; font-weight: 700; margin: 0;">山田 花子</h2>
+                                <span id="detail-status-badge" style="font-size: 0.75rem; padding: 3px 10px; border-radius: 6px; font-weight: 700; display: inline-block;">通常顧客</span>
+                            </div>
+                            <p id="detail-kana" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; margin-bottom: 0;">ヤマダ ハナコ</p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button id="btn-detail-archive" title="アーカイブ操作" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); color: var(--text-secondary); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                <span>📦</span> <span id="btn-detail-archive-text">アーカイブ</span>
+                            </button>
+                            <button id="btn-delete-customer" title="顧客を完全に削除" style="background: rgba(255, 82, 82, 0.12); border: 1px solid #ff5252; color: #ff5252; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                                <span>🗑️</span> <span>削除</span>
+                            </button>
+                            <button id="btn-close-detail" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.5rem; line-height: 1;">×</button>
+                        </div>
+                    </div>
+
+                    <!-- タブ切り替えボタン -->
+                    <div class="tab-container">
+                        <button class="tab-btn active" data-tab="visit-count">来店回数</button>
+                        <button class="tab-btn" data-tab="visit-type">施術内容</button>
+                        <button class="tab-btn" data-tab="visit-amount">金額</button>
+                        <button class="tab-btn" data-tab="personal-info">個人情報</button>
+                    </div>
+
+                    <!-- タブコンテンツ領域 -->
+                    <div class="tab-content" id="tab-content-area">
+                        <!-- 動的にコンテンツが挿入されます -->
+                    </div>
+
+                    <!-- 新規記録を追加するボタン (カレンダー直結化により非表示) -->
+                    <div id="add-record-action" style="margin-top: 8px; display: none;">
+                        <button id="btn-add-record" class="btn-primary" style="width: 100%;">
+                            <span>＋</span> この日の記録を追加
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- 顧客登録モーダル -->
+    <div class="modal-overlay" id="customer-modal">
+        <div class="modal-content">
+            <h3 id="customer-modal-title" style="font-size: 1.2rem; font-weight: 700; border-bottom: 1px solid var(--border-glass); padding-bottom: 8px;">新規顧客の登録</h3>
+            <form id="customer-form" style="display: flex; flex-direction: column; gap: 12px; max-height: 65vh; overflow-y: auto; padding-right: 4px; margin-bottom: 8px;">
+                <div class="form-group">
+                    <label for="input-customer-no">顧客No.</label>
+                    <input type="text" id="input-customer-no" class="form-control" placeholder="例: C-0001 (空欄時は自動発番)">
+                </div>
+                <div class="form-group">
+                    <label for="input-name">お名前 (必須)</label>
+                    <input type="text" id="input-name" class="form-control" placeholder="例: 山田 花子" required>
+                </div>
+                <div class="form-group">
+                    <label for="input-kana">よみがな</label>
+                    <input type="text" id="input-kana" class="form-control" placeholder="例: ヤマダ ハナコ">
+                </div>
+                <div class="form-group">
+                    <label for="input-phone">電話番号</label>
+                    <input type="tel" id="input-phone" class="form-control" placeholder="例: 090-1234-5678">
+                </div>
+                <div class="form-group">
+                    <label for="input-birthday">生年月日</label>
+                    <input type="date" id="input-birthday" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Soul Color (13色から最大5色・タップで選択／解除)</label>
+                    <div class="soul-color-selected-preview" id="input-soul-color-preview"></div>
+                    <div class="soul-color-selector" id="input-soul-color-container">
+                        <span class="color-chip red" data-color="red" title="レッド"></span>
+                        <span class="color-chip coral" data-color="coral" title="コーラル"></span>
+                        <span class="color-chip orange" data-color="orange" title="オレンジ"></span>
+                        <span class="color-chip gold" data-color="gold" title="ゴールド"></span>
+                        <span class="color-chip yellow" data-color="yellow" title="イエロー"></span>
+                        <span class="color-chip olive" data-color="olive" title="オリーブ"></span>
+                        <span class="color-chip green" data-color="green" title="グリーン"></span>
+                        <span class="color-chip turquoise" data-color="turquoise" title="ターコイズ"></span>
+                        <span class="color-chip blue" data-color="blue" title="ブルー"></span>
+                        <span class="color-chip royal-blue" data-color="royal-blue" title="ロイヤルブルー"></span>
+                        <span class="color-chip violet" data-color="violet" title="バイオレット"></span>
+                        <span class="color-chip magenta" data-color="magenta" title="マゼンタ"></span>
+                        <span class="color-chip clear" data-color="clear" title="クリア"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="input-referrer">紹介者</label>
+                    <input type="text" id="input-referrer" class="form-control" placeholder="例: 佐藤 健太">
+                </div>
+                <div class="form-group">
+                    <label for="input-initial-consultation">初診問診 (体重や病歴など)</label>
+                    <textarea id="input-initial-consultation" class="form-control" placeholder="例: 体重 52kg。病歴なし。アトピー肌のためオイル注意。"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="input-memo">特記事項・メモ</label>
+                    <textarea id="input-memo" class="form-control" placeholder="身体の特徴、お茶の好み等"></textarea>
+                </div>
+            </form>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" id="btn-cancel-customer" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-primary); flex: 1;">キャンセル</button>
+                <button type="button" id="btn-submit-customer" class="btn-primary" style="flex: 1;">登録する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- レコード（施術・金額・来店日）追加モーダル -->
+    <div class="modal-overlay" id="record-modal">
+        <div class="modal-content">
+            <h3 id="record-modal-title" style="font-size: 1.2rem; font-weight: 700; border-bottom: 1px solid var(--border-glass); padding-bottom: 8px;">施術内容・金額の記録</h3>
+            <form id="record-form" style="display: flex; flex-direction: column; gap: 12px; max-height: 65vh; overflow-y: auto; padding-right: 4px; margin-bottom: 8px;">
+                <div class="form-group" id="record-customer-select-group" style="display: none;">
+                    <label for="input-record-customer-id">対象顧客</label>
+                    <select id="input-record-customer-id" class="form-control">
+                        <!-- 動的に選択肢が挿入されます -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="input-date">来店日</label>
+                    <input type="date" id="input-date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="input-time">時間帯 (10:00〜18:00)</label>
+                    <select id="input-time" class="form-control">
+                        <option value="">-- 時間を選択 --</option>
+                        <option value="10:00">10:00</option>
+                        <option value="10:30">10:30</option>
+                        <option value="11:00">11:00</option>
+                        <option value="11:30">11:30</option>
+                        <option value="12:00">12:00</option>
+                        <option value="12:30">12:30</option>
+                        <option value="13:00">13:00</option>
+                        <option value="13:30">13:30</option>
+                        <option value="14:00">14:00</option>
+                        <option value="14:30">14:30</option>
+                        <option value="15:00">15:00</option>
+                        <option value="15:30">15:30</option>
+                        <option value="16:00">16:00</option>
+                        <option value="16:30">16:30</option>
+                        <option value="17:00">17:00</option>
+                        <option value="17:30">17:30</option>
+                        <option value="18:00">18:00</option>
+                        <option value="14:00 - 15:00">14:00 - 15:00 (1時間)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label for="select-plan" style="margin-bottom: 0;">施術プラン選択 (自動入力)</label>
+                        <button type="button" class="btn-manage-plans" style="background: rgba(0, 243, 255, 0.1); border: 1px solid rgba(0, 243, 255, 0.3); color: var(--accent-cyan); font-size: 0.75rem; cursor: pointer; padding: 4px 10px; border-radius: 6px;">プランを管理・編集</button>
+                    </div>
+                    <select id="select-plan" class="form-control">
+                        <!-- JSで動的にプランが挿入されます -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="input-type">施術メニュー・内容</label>
+                    <input type="text" id="input-type" class="form-control" placeholder="例: 全身もみほぐし 60分" required>
+                </div>
+                <div class="form-group">
+                    <label for="input-client-complaint">クライアント側の訴え</label>
+                    <textarea id="input-client-complaint" class="form-control" placeholder="例: 肩こり、首まわりの重だるさ"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="input-prescription">処方</label>
+                    <textarea id="input-prescription" class="form-control" placeholder="例: ブルーを用いたリラックスアプローチ、肩甲骨はがし"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="input-therapist-note">メモ (therapist側のメモ、気付き)</label>
+                    <textarea id="input-therapist-note" class="form-control" placeholder="例: 右肩下がりの緊張が強い。施術後はスッキリしたとのこと。"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="input-amount">金額 (円)</label>
+                    <input type="number" id="input-amount" class="form-control" placeholder="例: 6000" required>
+                </div>
+            </form>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" id="btn-cancel-record" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-primary); flex: 1;">キャンセル</button>
+                <button type="button" id="btn-submit-record" class="btn-primary" style="flex: 1;">記録する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 💡 使い方デモ＆操作ガイド モーダル -->
+    <div id="demo-guide-modal" class="modal-overlay">
+        <div class="modal-content" style="border-radius: 20px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">
+                <h2 style="margin: 0; font-size: 1.3rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px;">
+                    💡 セラピストCRM 操作ガイド & デモ
+                </h2>
+                <button id="btn-close-demo-modal" style="background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px; color: var(--text-primary); font-size: 0.95rem; line-height: 1.6;">
+                <div style="background: rgba(0, 242, 254, 0.08); border-left: 4px solid var(--accent-cyan); padding: 12px 16px; border-radius: 8px;">
+                    <strong>🌸 アプリの概要</strong><br>
+                    セラピストがお客様の施術記録、Soul Color（カラー診断結果）、来店ペース、過去の金額・施術内容をひと目で管理・分析できるWebアプリです。
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 14px; border-radius: 12px;">
+                        <h4 style="margin: 0 0 6px 0; color: var(--accent-purple); font-size: 1rem;">1. 👥 新規顧客の登録</h4>
+                        <p style="margin: 0; font-size: 0.88rem; color: var(--text-secondary);">
+                            「<strong>＋ 顧客登録</strong>」ボタンからお名前、よみがな、電話番号、13色から選べる Soul Color（最大5色選択）を設定して保存します。
+                        </p>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 14px; border-radius: 12px;">
+                        <h4 style="margin: 0 0 6px 0; color: var(--accent-cyan); font-size: 1rem;">2. 📅 カレンダーと施術記録</h4>
+                        <p style="margin: 0; font-size: 0.88rem; color: var(--text-secondary);">
+                            「<strong>📅 カレンダー</strong>」タブで月間カレンダーを開き、日付セルをクリックするとその日の訪問者と「<strong>✍️ この日の記録を追加</strong>」フォームが表示され、施術メニュー・金額・訴え・処方を素早く登録できます。
+                        </p>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 14px; border-radius: 12px;">
+                        <h4 style="margin: 0 0 6px 0; color: var(--accent-success); font-size: 1rem;">3. 📋 顧客カルテ詳細・4つのタブ</h4>
+                        <p style="margin: 0; font-size: 0.88rem; color: var(--text-secondary);">
+                            顧客カードをクリックすると右側にカルテが開きます。<br>
+                            ・<strong>来店回数</strong>: 通算回数・平均来店ペース（約N日ペース）を自動計算<br>
+                            ・<strong>施術内容</strong>: 過去の施術名・訴え・処方・メモ一覧<br>
+                            ・<strong>金額</strong>: 累計お支払い額・平均客単価と施術内容明記<br>
+                            ・<strong>個人情報</strong>: 顧客No・連絡先等の基本データ
+                        </p>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 14px; border-radius: 12px;">
+                        <h4 style="margin: 0 0 6px 0; color: #f39c12; font-size: 1rem;">4. 🤖 AI操作ガイド Agent</h4>
+                        <p style="margin: 0; font-size: 0.88rem; color: var(--text-secondary);">
+                            画面右下の丸いアイコンを押すと、いつでもAIアシスタントが個別の操作方法や疑問に回答してくれます。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+                <button id="btn-start-live-tour" class="btn-primary" style="flex: 100%; background: linear-gradient(135deg, var(--accent-cyan), #00e676); color: #000; font-weight: 700; padding: 12px; border-radius: 10px; font-size: 1rem; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);">
+                    🎬 ライブツアー実演を見る（自動カーソル操作）
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎬 ライブデモツアー用カーソル & ガイドバナー -->
+    <div id="live-demo-cursor">
+        <div class="cursor-pointer"></div>
+        <div id="live-demo-cursor-label" class="cursor-label">操作準備中...</div>
+    </div>
+
+    <div id="live-demo-banner">
+        <span style="font-size: 1rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 10px; height: 10px; background: #00e676; border-radius: 50%; box-shadow: 0 0 8px #00e676; animation: pulse 1.5s infinite;"></span>
+            🎬 ライブデモ実演中
+        </span>
+        <span id="live-demo-step-text" style="font-size: 0.9rem; color: #ffffff;">初期化中...</span>
+        <button id="btn-stop-live-tour" style="background: rgba(255, 82, 82, 0.2); border: 1px solid #ff5252; color: #ff5252; padding: 4px 12px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 0.8rem; margin-left: 8px;">
+            ⏹ 停止する
+        </button>
+    </div>
+
+    <!-- ⚙️ 施術プラン管理モーダル -->
+    <div class="modal-overlay" id="plan-modal">
+        <div class="modal-content" style="max-width: 450px; display: flex; flex-direction: column;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; border-bottom: 1px solid var(--border-glass); padding-bottom: 8px; margin-bottom: 12px; flex-shrink: 0;">施術プランの管理</h3>
+            
+            <div id="plan-list-container" style="max-height: 250px; overflow-y: auto; margin-bottom: 16px; flex-grow: 1;">
+                <!-- プラン一覧がここに表示されます -->
+            </div>
+
+            <div class="plan-form-container" style="background: rgba(255,255,255,0.03); padding: 16px; border-radius: 16px; border: 1px solid var(--border-glass); flex-shrink: 0;">
+                <h4 style="font-size: 0.9rem; margin-bottom: 10px; color: var(--accent-cyan);">新しいプランを追加</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <input type="text" id="new-plan-name" class="form-control" placeholder="プラン名（例：全身コース）">
+                    <input type="number" id="new-plan-amount" class="form-control" placeholder="金額（例：8000）">
+                    <textarea id="new-plan-description" class="form-control" placeholder="施術内容の説明・詳細" style="min-height: 60px;"></textarea>
+                    <button type="button" id="btn-add-new-plan" class="btn-primary" style="padding: 10px;">プランを追加保存</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 12px; flex-shrink: 0;">
+                <button type="button" id="btn-close-plan-modal" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-primary); width: 100%;">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚠️ カスタム削除・確認モーダル -->
+    <div class="modal-overlay" id="confirm-modal" style="z-index: 10000;">
+        <div class="modal-content" style="max-width: 400px; text-align: center; border: 1px solid rgba(255, 82, 82, 0.5); box-shadow: 0 10px 30px rgba(255, 82, 82, 0.25);">
+            <div style="font-size: 2.5rem; margin-bottom: 8px;">🗑️</div>
+            <h3 id="confirm-modal-title" style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 1.2rem; font-weight: 700;">削除の確認</h3>
+            <p id="confirm-modal-message" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5; white-space: pre-line;">本当に削除してもよろしいですか？</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button type="button" id="btn-cancel-confirm" class="btn-secondary" style="flex: 1; padding: 10px; border-radius: 8px; font-weight: 600;">キャンセル</button>
+                <button type="button" id="btn-submit-confirm" style="flex: 1; padding: 10px; border-radius: 8px; background: #ff5252; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <span>🗑️</span> <span id="confirm-modal-action-text">削除する</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔔 トースト通知バナー -->
+    <div id="toast-notification" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px); opacity: 0; pointer-events: none; transition: all 0.3s ease; z-index: 20000; background: rgba(15, 23, 42, 0.95); border: 1px solid var(--accent-cyan); color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 0.9rem; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 8px;">
+        <span id="toast-icon">✨</span> <span id="toast-message">メッセージ</span>
+    </div>
+
+    <!-- UI制御ロジックのロード -->
+    <script type="module" src="js/app/ui.js"></script>
+
+    <!-- Aurora Dialogue Chat Integration (For context linking) -->
+    <script type="module">
+        import { initAuroraChat } from './js/vendor/floating-chat/integrations/entry-aurora.js';
+        initAuroraChat();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1112 @@
+/* セラピスト向け顧客管理アプリ：コアデザインシステム */
+
+/* 1. 変数定義 (HSLカラーパレットとダーク/ライトテーマブレンド) */
+:root {
+    --theme-blend: 0%; /* 0%がDark、100%がLight。ポータルのスライダー等と同様 */
+    
+    /* 背景色 (ダーク＝深藍、ライト＝柔らかい白) */
+    --bg-base: color-mix(in srgb, #f8fafc var(--theme-blend), #0f172a);
+    --bg-surface: color-mix(in srgb, rgba(255, 255, 255, 0.8) var(--theme-blend), rgba(30, 41, 59, 0.7));
+    
+    /* 文字色 */
+    --text-primary: color-mix(in srgb, #0f172a var(--theme-blend), #f8fafc);
+    --text-secondary: color-mix(in srgb, #475569 var(--theme-blend), #94a3b8);
+    
+    /* ガラスモフィズム・ボーダー */
+    --border-glass: color-mix(in srgb, rgba(15, 23, 42, 0.08) var(--theme-blend), rgba(255, 255, 255, 0.08));
+    --border-active: color-mix(in srgb, #00f2fe, #7367f0);
+    
+    /* アクセントカラー */
+    --accent-cyan: #00f2fe;
+    --accent-purple: #7367f0;
+    --accent-success: #10b981;
+    --accent-warning: #f59e0b;
+    --accent-danger: #ef4444;
+
+    /* トランジション */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 2. リセット & 基本設定 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent; /* タップ時の青い枠線を消す */
+}
+
+body {
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    background: var(--bg-base);
+    /* [MINOR v1.10.0] 複数の極彩色をブレンドした、スクロール追従型の美しいオーラ背景 */
+    background-image: 
+        radial-gradient(at 10% 20%, rgba(0, 242, 254, 0.18) 0%, transparent 45%),
+        radial-gradient(at 90% 10%, rgba(115, 103, 240, 0.18) 0%, transparent 45%),
+        radial-gradient(at 50% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
+        radial-gradient(at 80% 90%, rgba(16, 185, 129, 0.06) 0%, transparent 40%);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* 3. レイアウト (スマホファースト) */
+header {
+    padding: 16px 20px;
+    background: var(--bg-surface);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-glass);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+main {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 1200px; /* ワイド幅に対応 */
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* ワークスペースグリッド設計 */
+.workspace-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    align-items: start;
+    width: 100%;
+}
+
+/* 一覧時は詳細を非表示、詳細表示（detail-mode）時は一覧を非表示にする */
+.workspace-grid .workspace-column-right {
+    display: none;
+}
+.workspace-grid.detail-mode .workspace-column-left {
+    display: none;
+}
+.workspace-grid.detail-mode .workspace-column-right {
+    display: block;
+}
+
+/* カレンダーモード時はカレンダーを全画面表示し、詳細は非表示 */
+.workspace-grid.calendar-mode .workspace-column-left {
+    display: block;
+}
+.workspace-grid.calendar-mode .workspace-column-right {
+    display: none !important;
+}
+
+.workspace-column-left {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.workspace-column-right {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+
+.calendar-visit-item:hover {
+    transform: translateX(4px);
+    border-color: var(--accent-cyan);
+}
+
+/* 7. 顧客グリッドカード表示用UI */
+.customer-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    width: 100%;
+}
+
+.customer-card-grid-item {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-glass);
+    border-radius: 20px;
+    padding: 20px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.customer-card-grid-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* 各色ごとの微細な背景色ブレンドと枠線発光 */
+.customer-card-grid-item.soul-card-red {
+    border-color: rgba(239, 68, 68, 0.3);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, var(--bg-surface) 100%);
+}
+.customer-card-grid-item.soul-card-red:hover { border-color: #ef4444; box-shadow: 0 0 16px rgba(239, 68, 68, 0.3); }
+
+.customer-card-grid-item.soul-card-coral {
+    border-color: rgba(248, 113, 113, 0.3);
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.12) 0%, var(--bg-surface) 100%);
+}
+.customer-card-grid-item.soul-card-coral:hover { border-color: #f87171; box-shadow: 0 0 16px rgba(248, 113, 113, 0.3); }
+
+.customer-card-grid-item.soul-card-orange {
+    border-color: rgba(251, 146, 60, 0.3);
+    background: linear-gradient(135deg, rgba(251, 146, 60, 0.12) 0%, var(--bg-surface) 100%);
+}
+.customer-card-grid-item.soul-card-orange:hover { border-color: #fb923c; box-shadow: 0 0 16px rgba(251, 146, 60, 0.3); }
+
+.customer-card-grid-item.soul-card-gold {
+    border-color: rgba(251, 191, 36, 0.3);
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, var(--bg-surface) 100%);
+}
+.customer-card-grid-item.soul-card-gold:hover { border-color: #fbbf24; box-shadow: 0 0 16px rgba(251, 191, 36, 0.3); }
+
+.customer-card-grid-item.soul-card-yellow {
+    border-color: rgba(250, 204, 21, 0.3);
+    background: linear-gradient(135deg, rgba(250, 204, 21, 0.12) 0%, var(--bg-surface) 100%);
+}
+.customer-card-grid-item.soul-card-yellow:hover { border-color: #facc15; box-shadow: 0 0 16px rgba(250, 204, 21, 0.3); }
+
+.customer-card-grid-item.soul-card-olive {
+    border-color: rgba(163, 230, 53, 0.3);
+    background: linear-gradient(135deg, rgba(163, 230, 53, 0.12) 0%, var(--bg-surface) 100%);
+}
+.customer-card-grid-item.soul-card-olive:hover { border-color: #a3e635; box-shadow: 0 0 16px rgba(163, 230, 53, 0.3); }
+
+.customer-card-grid-item.soul-card-green {
+    border-color: rgba(74, 222, 128, 0.3);
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.12) 0%, var(--bg-surface) 100%);
+}
+.customer-card-grid-item.soul-card-green:hover { border-color: #4ade80; box-shadow: 0 0 16px rgba(74, 222, 128, 0.3); }
+
+.customer-card-grid-item.soul-card-turquoise {
+    border-color: rgba(45, 212, 191, 0.3);
+    background: linear-gradient(135deg, rgba(45, 212, 191, 0.12) 0%, var(--bg-surface) 100%);
+}
+.customer-card-grid-item.soul-card-turquoise:hover { border-color: #2dd4bf; box-shadow: 0 0 16px rgba(45, 212, 191, 0.3); }
+
+.customer-card-grid-item.soul-card-blue {
+    border-color: rgba(96, 165, 250, 0.3);
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.12) 0%, var(--bg-surface) 100%);
+}
+.customer-card-grid-item.soul-card-blue:hover { border-color: #60a5fa; box-shadow: 0 0 16px rgba(96, 165, 250, 0.3); }
+
+.customer-card-grid-item.soul-card-royal-blue {
+    border-color: rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, var(--bg-surface) 100%);
+}
+.customer-card-grid-item.soul-card-royal-blue:hover { border-color: #3b82f6; box-shadow: 0 0 16px rgba(59, 130, 246, 0.3); }
+
+.customer-card-grid-item.soul-card-violet {
+    border-color: rgba(167, 139, 250, 0.3);
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.12) 0%, var(--bg-surface) 100%);
+}
+.customer-card-grid-item.soul-card-violet:hover { border-color: #a78bfa; box-shadow: 0 0 16px rgba(167, 139, 250, 0.3); }
+
+.customer-card-grid-item.soul-card-magenta {
+    border-color: rgba(236, 72, 153, 0.3);
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.12) 0%, var(--bg-surface) 100%);
+}
+.customer-card-grid-item.soul-card-magenta:hover { border-color: #ec4899; box-shadow: 0 0 16px rgba(236, 72, 153, 0.3); }
+
+.customer-card-grid-item.soul-card-clear {
+    border-color: var(--border-glass);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, var(--bg-surface) 100%);
+}
+.customer-card-grid-item.soul-card-clear:hover { border-color: var(--text-secondary); box-shadow: 0 0 12px rgba(255, 255, 255, 0.1); }
+
+
+
+/* 4. コンポーネント */
+
+/* 検索 & 追加バー */
+.search-container {
+    display: flex;
+    gap: 8px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border-glass);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: var(--transition-smooth);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+}
+
+.btn-primary {
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(115, 103, 240, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(115, 103, 240, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+
+.customer-card {
+    background: var(--bg-surface);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+    padding: 16px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.customer-card:hover {
+    transform: translateX(4px);
+    border-color: var(--accent-cyan);
+}
+
+.customer-info h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.customer-info p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* 詳細モーダル/ビュー */
+.detail-view {
+    background: var(--bg-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    border-radius: 24px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 4つの切替タブボタン */
+.tab-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px;
+    border-radius: 14px;
+}
+
+.tab-btn {
+    padding: 10px 4px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    text-align: center;
+}
+
+.tab-btn.active {
+    background: var(--bg-surface);
+    color: var(--accent-cyan);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* タブコンテンツ領域 */
+.tab-content {
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+/* 各種リストアイテム（履歴など） */
+.history-item {
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    border-left: 3px solid var(--accent-purple);
+}
+
+.history-item.amount {
+    border-left-color: var(--accent-success);
+}
+
+.history-item-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.history-item-body {
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+/* モーダル背景 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: flex-end; /* スマホの下部ハーフモーダル風 */
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background: var(--bg-base);
+    width: 100%;
+    max-width: 600px;
+    border-radius: 24px 24px 0 0;
+    padding: 24px;
+    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.3);
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modal-overlay.active .modal-content {
+    transform: translateY(0);
+}
+
+/* フォーム関連 */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.form-control {
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border-glass);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: var(--transition-smooth);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+}
+
+textarea.form-control {
+    resize: none;
+    min-height: 80px;
+}
+
+/* ローディング表示 */
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(0, 242, 254, 0.1);
+    border-top-color: var(--accent-cyan);
+    border-radius: 50%;
+    animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}/* 5. ソウルカラー表示・選択用UI */
+.soul-color-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    border: 1px solid var(--border-glass);
+    margin-top: 4px;
+}
+
+.color-chip {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    border: 2px solid transparent;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.color-chip:hover {
+    transform: scale(1.15);
+}
+
+.color-chip.active {
+    border-color: #fff;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* [ISSUE-018] 選択順（1〜5）をチップ上にバッジ表示する */
+.color-chip.active::after {
+    content: attr(data-order);
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 3px;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+/* 上限5色に達したとき、未選択チップは選べないことを示す */
+.color-chip.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.color-chip.disabled:hover {
+    transform: none;
+}
+
+/* [ISSUE-018] 選択中カラーのプレビュー（上段3色・下段2色） */
+/* ラベル横にインライン表示し、縦方向のスペースを増やさない
+   （.tab-content は max-height:400px のスクロール領域のため、
+     行を増やすと保存ボタンが折り返しの外へ押し出されてしまう） */
+.soul-color-selected-preview {
+    display: inline-flex;
+    align-items: center;
+}
+
+.soul-color-badge {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    vertical-align: middle;
+}
+
+.soul-color-badge-row {
+    display: flex;
+    gap: 3px;
+    justify-content: center;
+}
+
+.soul-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.soul-color-badge.sm .soul-dot {
+    width: 9px;
+    height: 9px;
+}
+
+/* 各色のバックグラウンド定義 */
+.color-chip.red { background-color: #ef4444; }
+.color-chip.coral { background-color: #f87171; }
+.color-chip.orange { background-color: #fb923c; }
+.color-chip.gold { background-color: #fbbf24; }
+.color-chip.yellow { background-color: #facc15; }
+.color-chip.olive { background-color: #a3e635; }
+.color-chip.green { background-color: #4ade80; }
+.color-chip.turquoise { background-color: #2dd4bf; }
+.color-chip.blue { background-color: #60a5fa; }
+.color-chip.royal-blue { background-color: #3b82f6; }
+.color-chip.violet { background-color: #a78bfa; }
+.color-chip.magenta { background-color: #ec4899; }
+.color-chip.clear { background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%); }
+
+/* 顧客リスト内のカラーインジケーター */
+.customer-color-indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: middle;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* 各色インジケーターのバックグラウンドクラス */
+.bg-red { background-color: #ef4444; }
+.bg-coral { background-color: #f87171; }
+.bg-orange { background-color: #fb923c; }
+.bg-gold { background-color: #fbbf24; }
+.bg-yellow { background-color: #facc15; }
+.bg-olive { background-color: #a3e635; }
+.bg-green { background-color: #4ade80; }
+.bg-turquoise { background-color: #2dd4bf; }
+.bg-blue { background-color: #60a5fa; }
+.bg-royal-blue { background-color: #3b82f6; }
+.bg-violet { background-color: #a78bfa; }
+.bg-magenta { background-color: #ec4899; }
+.bg-clear { background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%); }
+
+/* プレミアムなカラーバッジ（詳細用） */
+.soul-color-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-glass);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.soul-color-badge-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+/* 6. カレンダー表示用UI */
+.calendar-view-section {
+    background: var(--bg-surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    border-radius: 24px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-glass);
+    padding-bottom: 12px;
+}
+
+.calendar-nav-btn {
+    background: none;
+    border: 1px solid var(--border-glass);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: var(--transition-smooth);
+}
+
+.calendar-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent-cyan);
+}
+
+.calendar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.calendar-grid {
+    display: grid;
+    /* [BUGFIX ISSUE-017] 1fr は暗黙に min-width:auto を持ち、セルの内容幅より
+       狭くできないためスマホで横に溢れる。minmax(0, 1fr) で最小幅の下限を外し、
+       常にコンテナ幅ぴったりに7列を収める。 */
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+    text-align: center;
+    width: 100%;
+}
+
+.calendar-weekday {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    padding: 4px 0;
+    text-transform: uppercase;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    /* [BUGFIX ISSUE-017] aspect-ratio は min/max 制約を軸間で転写するため、
+       min-height:48px が「最小幅48px」として効いてしまい、
+       7列で 48*7+8*6=384px の下限が生まれてスマホ幅を超過していた。
+       最小サイズの下限を外し、列幅に追従する正方形セルにする。 */
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    position: relative;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.calendar-day:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--border-active);
+}
+
+.calendar-day.today {
+    background: rgba(0, 242, 254, 0.1);
+    border-color: var(--accent-cyan);
+}
+
+.calendar-day.selected {
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 12px rgba(115, 103, 240, 0.4);
+}
+
+.calendar-day.other-month {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.calendar-day-num {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.calendar-day-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    flex-wrap: wrap;
+    margin-top: auto;
+    width: 100%;
+}
+
+.calendar-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.calendar-visits-list {
+    margin-top: 16px;
+    border-top: 1px solid var(--border-glass);
+    padding-top: 16px;
+}
+
+.calendar-visit-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    border: 1px solid var(--border-glass);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.calendar-visit-item:hover {
+    transform: translateX(4px);
+    border-color: var(--accent-cyan);
+}
+
+
+/* ------------------------------------------------------------------
+   8. レスポンシブ対応（スマホ）  [ISSUE-017]
+   横方向の余白を詰めて、カレンダーの7列が画面幅に収まるようにする。
+   body に overflow-x: hidden があるため、溢れるとスクロールできず
+   「見切れ」になってしまう。したがって溢れさせないことが必須。
+   ------------------------------------------------------------------ */
+@media (max-width: 640px) {
+    header {
+        padding: 8px 12px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: nowrap; /* Keep on one line if possible, but shrink title */
+    }
+    header h1 {
+        font-size: 0.85rem;
+        max-width: 45%;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    header .theme-toggle-container {
+        transform: scale(0.75);
+        margin: 0;
+        flex-shrink: 0;
+    }
+
+    main {
+        padding: 8px;
+        gap: 8px;
+    }
+
+    .search-container {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px !important;
+        margin-bottom: 12px;
+    }
+    .search-input {
+        grid-column: span 2;
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+    #btn-add-customer, #btn-demo-guide {
+        width: 100%;
+        height: 40px !important;
+        padding: 0 8px !important;
+        font-size: 0.8rem !important;
+        border-radius: 10px !important;
+    }
+
+    .customer-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .calendar-view-section {
+        padding: 12px;
+        border-radius: 16px;
+        gap: 12px;
+    }
+
+    .calendar-grid {
+        gap: 2px;
+    }
+
+    .calendar-day {
+        padding: 4px 1px;
+        min-height: 48px;
+        border-radius: 8px;
+    }
+
+    .calendar-day-num {
+        font-size: 0.8rem;
+    }
+
+    .calendar-dot {
+        width: 5px;
+        height: 5px;
+    }
+
+    .calendar-weekday {
+        font-size: 0.7rem;
+    }
+
+    .calendar-title {
+        font-size: 1rem;
+    }
+
+    .calendar-nav-btn {
+        padding: 6px 10px;
+    }
+
+    /* 施術記録カードも縦積みにして溢れを防ぐ */
+    .calendar-visit-item {
+        padding: 10px 12px;
+    }
+
+    /* モーダル共通調整 */
+    .modal-content {
+        max-height: 85vh;
+        width: 94%;
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    /* カレンダー詳細のバランス調整 */
+    #calendar-visits-container {
+        max-height: 200px;
+        overflow-y: auto;
+        border-top: 1px dashed var(--border-glass);
+        padding-top: 8px;
+        margin-top: 8px;
+    }
+
+    #live-demo-banner {
+        top: auto !important;
+        bottom: 70px !important; /* 位置を少し下げる */
+        width: 94% !important;
+        left: 3% !important;
+        transform: none !important;
+        font-size: 0.8rem; /* 文字を少し小さく */
+        padding: 6px 12px !important;
+        background: rgba(15, 23, 42, 0.95) !important; /* 不透明度を上げる */
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(0, 243, 255, 0.4) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        z-index: 10001 !important; /* 最前面に */
+    }
+
+    /* デモ実行中のみバナーとの重なりを防ぐために余白を追加 */
+    body.demo-active .modal-content {
+        padding-bottom: 90px !important;
+    }
+}
+
+/* 仮想カーソル用ラベルスタイル */
+#live-demo-cursor-label {
+    position: absolute;
+    top: 30px;
+    left: 20px;
+    background: #00f3ff;
+    color: #0f172a;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: normal;
+    word-break: break-word;
+    box-shadow: 0 4px 15px rgba(0, 243, 255, 0.3);
+    pointer-events: none;
+    max-width: 240px;
+    min-width: 120px;
+    line-height: 1.35;
+}
+.plan-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-glass);
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 4px;
+    opacity: 0.7;
+    transition: var(--transition-smooth);
+}
+.btn-icon:hover { opacity: 1; transform: scale(1.1); }
+
+/* ------------------------------------------------------------------
+   9. ライブデモツアー・自動カーソルスタイリング
+   ------------------------------------------------------------------ */
+#live-demo-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 32px;
+    height: 32px;
+    z-index: 20050 !important; /* モーダルやドロップダウンリストよりも絶対に最前面へ */
+    pointer-events: none;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+    display: none;
+    filter: drop-shadow(0 4px 10px rgba(0, 242, 254, 0.5));
+}
+
+#live-demo-cursor.active {
+    display: block;
+}
+
+#live-demo-cursor .cursor-pointer {
+    width: 28px;
+    height: 28px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300f2fe' stroke='%23ffffff' stroke-width='1.5'%3E%3Cpath d='M3 3l7 18 3-7 7-3L3 3z'/%3E%3C/svg%3E") no-repeat center center / contain;
+}
+
+#live-demo-cursor .cursor-label {
+    position: absolute;
+    top: 28px;
+    left: 12px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid var(--accent-cyan);
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: normal;
+    word-break: break-word;
+    max-width: 250px;
+    min-width: 120px;
+    line-height: 1.4;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+}
+
+/* デモ用ドロップダウン選択UI */
+.demo-dropdown-menu {
+    position: fixed;
+    z-index: 20000 !important;
+    background: rgba(15, 23, 42, 0.98);
+    border: 1px solid var(--accent-cyan);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 242, 254, 0.2);
+    overflow: hidden;
+    padding: 4px 0;
+    animation: demoDropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+@keyframes demoDropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.demo-dropdown-item {
+    padding: 9px 16px;
+    font-size: 0.85rem;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+}
+
+.demo-dropdown-item.active-hover,
+.demo-dropdown-item:hover {
+    background: #0284c7;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.demo-click-ripple {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 242, 254, 0.4);
+    border: 2px solid var(--accent-cyan);
+    transform: translate(-50%, -50%) scale(0.2);
+    animation: demoRipple 0.6s ease-out forwards;
+    pointer-events: none;
+    z-index: 20060 !important;
+}
+
+@keyframes demoRipple {
+    0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.8);
+        opacity: 0;
+    }
+}
+
+#live-demo-banner {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid var(--accent-cyan);
+    border-radius: 30px;
+    padding: 10px 20px;
+    display: none;
+    align-items: center;
+    gap: 16px;
+    z-index: 9999;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+}
+
+#live-demo-banner.active {
+    display: flex;
+}
+
