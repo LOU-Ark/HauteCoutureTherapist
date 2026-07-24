@@ -19,9 +19,22 @@
 
     <main>
         <!-- ビュー切り替えスイッチ -->
-        <div class="view-switcher" style="display: flex; gap: 8px; margin-bottom: 8px; background: rgba(0,0,0,0.15); padding: 4px; border-radius: 12px; border: 1px solid var(--border-glass);">
-            <button id="btn-view-list" style="flex: 1; padding: 10px; border-radius: 8px; border: none; background: var(--accent-cyan); color: #000; font-weight: 600; cursor: pointer; transition: var(--transition-smooth);">👥 顧客一覧</button>
-            <button id="btn-view-calendar" style="flex: 1; padding: 10px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 500; cursor: pointer; transition: var(--transition-smooth);">📅 カレンダー</button>
+        <div class="view-switcher tab-group-container" style="margin-bottom: 12px;">
+            <div class="tab-item-wrapper">
+                <button id="btn-view-list" class="tab-item-btn active-tab-btn" title="顧客一覧を表示">
+                    👥 <span class="btn-text">顧客一覧</span>
+                </button>
+            </div>
+            <div class="tab-item-wrapper">
+                <button id="btn-view-calendar" class="tab-item-btn" title="カレンダーを表示">
+                    📅 <span class="btn-text">カレンダー</span>
+                </button>
+            </div>
+            <div class="tab-item-wrapper">
+                <button id="btn-view-color-settings" class="tab-item-btn" title="カラー設定を表示">
+                    🎨 <span class="btn-text">カラー設定</span>
+                </button>
+            </div>
         </div>
 
         <div class="workspace-grid">
@@ -30,16 +43,24 @@
                 <!-- 検索・追加エリア -->
                 <section class="search-container" id="search-container-section">
                     <input type="text" id="search-input" class="search-input" placeholder="名前・かなで検索...">
-                    <div style="display: flex; align-items: center; gap: 4px; margin-right: 8px; margin-left: 4px;">
-                        <input type="checkbox" id="check-show-archived" style="width: 14px; height: 14px; cursor: pointer;">
-                        <label for="check-show-archived" style="font-size: 0.75rem; color: var(--text-secondary); cursor: pointer; white-space: nowrap;">アーカイブ表示</label>
+                    <div class="search-actions tab-group-container">
+                        <div class="tab-item-wrapper btn-archive-toggle" title="アーカイブ表示切替">
+                            <input type="checkbox" id="check-show-archived" class="hidden-checkbox">
+                            <label for="check-show-archived" class="tab-item-btn">
+                                📦<span class="btn-text">アーカイブ</span>
+                            </label>
+                        </div>
+                        <div class="tab-item-wrapper">
+                            <button id="btn-add-customer" class="tab-item-btn" title="新規顧客を登録" style="color: var(--accent-cyan);">
+                                👤+<span class="btn-text">顧客登録</span>
+                            </button>
+                        </div>
+                        <div class="tab-item-wrapper">
+                            <button id="btn-demo-guide" class="tab-item-btn" title="デモガイドを表示">
+                                💡<span class="btn-text">デモ</span>
+                            </button>
+                        </div>
                     </div>
-                    <button id="btn-add-customer" class="btn-primary">
-                        <span style="font-size: 1.2rem;">＋</span> 顧客登録
-                    </button>
-                    <button id="btn-demo-guide" class="btn-secondary" style="background: rgba(0, 242, 254, 0.15); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: var(--transition-smooth);">
-                        💡 使い方デモ
-                    </button>
                 </section>
 
                 <!-- 顧客一覧リスト -->
@@ -69,7 +90,9 @@
                     <div id="calendar-day-details" class="calendar-visits-list" style="display: none;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-glass); padding-bottom: 8px;">
                             <h3 id="calendar-details-title" style="font-size: 1.05rem; font-weight: 700; margin: 0;">7月20日の記録</h3>
-                            <button id="btn-calendar-add-record" class="btn-primary" style="display: none; padding: 6px 12px; font-size: 0.8rem;">＋ 記録追加</button>
+                            <button id="btn-calendar-add-record" class="btn-primary" title="記録を追加" style="display: none; padding: 6px 12px; font-size: 0.8rem;">
+                                ＋ <span class="btn-text">記録追加</span>
+                            </button>
                         </div>
 
                         <!-- [MINOR v1.6.0] カレンダー直結型クイックインライン記録フォーム -->
@@ -84,7 +107,9 @@
                                     <div style="flex: 1; min-width: 140px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                                             <span style="font-size: 0.75rem; color: var(--text-secondary);">プラン選択</span>
-                                            <button type="button" class="btn-manage-plans" style="background: rgba(0, 243, 255, 0.1); border: 1px solid rgba(0, 243, 255, 0.3); color: var(--accent-cyan); font-size: 0.65rem; cursor: pointer; padding: 2px 6px; border-radius: 4px;">プラン編集</button>
+                                            <button type="button" class="btn-manage-plans" title="プランを編集" style="background: rgba(0, 243, 255, 0.1); border: 1px solid rgba(0, 243, 255, 0.3); color: var(--accent-cyan); font-size: 0.65rem; cursor: pointer; padding: 2px 6px; border-radius: 4px;">
+                                                ⚙️ <span class="btn-text">プラン編集</span>
+                                            </button>
                                         </div>
                                         <select id="inline-select-plan" class="form-control" style="width: 100%; padding: 8px; font-size: 0.85rem;"></select>
                                     </div>
@@ -143,12 +168,65 @@
                                     </div>
                                 </details>
 
-                                <button type="button" id="btn-inline-submit-record" class="btn-primary" style="padding: 10px; font-size: 0.9rem; margin-top: 6px; width: 100%;">この記録を保存する</button>
+                                <button type="button" id="btn-inline-submit-record" class="btn-primary" title="記録を保存" style="padding: 10px; font-size: 0.9rem; margin-top: 6px; width: 100%;">
+                                    💾 <span class="btn-text">この記録を保存する</span>
+                                </button>
                             </div>
                         </div>
 
                         <div id="calendar-visits-container">
                             <!-- 動的にその日の来店記録がリスト表示されます -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- カラー設定ビューエリア (初期値は非表示) -->
+                <section id="color-settings-view-container" style="display: none;" class="color-settings-section">
+                    <div style="background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid var(--border-glass); border-radius: 20px; padding: 20px; box-shadow: var(--shadow-card);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">
+                            <div>
+                                <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px; color: var(--text-primary);">
+                                    🎨 サロン・セラピストカラー設定
+                                </h2>
+                                <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 4px 0 0 0;">
+                                    登録したカラーと名前は、顧客登録時のカラー選択でそのまま一覧から呼び出せます。
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- カラー新規登録・追加カード -->
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 14px; padding: 16px; margin-bottom: 20px;">
+                            <h3 style="font-size: 0.9rem; font-weight: 700; margin-top: 0; margin-bottom: 12px; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px;">
+                                ＋ 新しい設定カラーを追加
+                            </h3>
+                            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+                                <div style="flex: 1; min-width: 150px;">
+                                    <label style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">カラー名称 (例: ローズアロマ)</label>
+                                    <input type="text" id="input-new-color-name" class="form-control" placeholder="カラー名を入力..." style="width: 100%; padding: 8px 12px; font-size: 0.85rem;">
+                                </div>
+                                <div style="width: 130px;">
+                                    <label style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">色コード</label>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <input type="color" id="input-new-color-picker" style="width: 36px; height: 36px; border: none; border-radius: 8px; cursor: pointer; background: transparent; padding: 0;" value="#00f2fe">
+                                        <input type="text" id="input-new-color-code" class="form-control" value="#00f2fe" style="width: 72px; padding: 6px; font-size: 0.75rem; text-align: center;">
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="button" id="btn-add-color-master" class="btn-primary" style="padding: 9px 18px; font-size: 0.85rem; font-weight: 700; background: linear-gradient(135deg, var(--accent-cyan), #00a8ff); color: #000; border: none; border-radius: 10px; cursor: pointer; white-space: nowrap;">
+                                        ＋ カラーを登録
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 登録済みカラーマスター一覧 -->
+                        <div>
+                            <h3 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 12px; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+                                📋 設定済みカラーマスター一覧
+                            </h3>
+                            <div id="color-masters-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">
+                                <!-- JSでカードを動的生成 -->
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -158,36 +236,87 @@
             <div class="workspace-column-right">
                 <!-- 顧客詳細ビュー (未選択時は非表示) -->
                 <section class="detail-view" id="customer-detail-view" style="display: none;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">
-                        <div>
+                    <div class="detail-view-header">
+                        <div class="detail-view-title-group">
                             <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                 <h2 id="detail-name" style="font-size: 1.4rem; font-weight: 700; margin: 0;">山田 花子</h2>
                                 <span id="detail-status-badge" style="font-size: 0.75rem; padding: 3px 10px; border-radius: 6px; font-weight: 700; display: inline-block;">通常顧客</span>
                             </div>
                             <p id="detail-kana" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; margin-bottom: 0;">ヤマダ ハナコ</p>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <button id="btn-detail-archive" title="アーカイブ操作" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); color: var(--text-secondary); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                                <span>📦</span> <span id="btn-detail-archive-text">アーカイブ</span>
-                            </button>
-                            <button id="btn-delete-customer" title="顧客を完全に削除" style="background: rgba(255, 82, 82, 0.12); border: 1px solid #ff5252; color: #ff5252; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-                                <span>🗑️</span> <span>削除</span>
-                            </button>
-                            <button id="btn-close-detail" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.5rem; line-height: 1;">×</button>
+                        <div class="detail-view-actions">
+                            <div class="tab-group-container" style="flex: 1;">
+                                <div class="tab-item-wrapper">
+                                    <button id="btn-edit-customer" title="顧客情報を編集" class="tab-item-btn">
+                                        <span>✏️</span> <span class="btn-text">編集</span>
+                                    </button>
+                                </div>
+                                <div class="tab-item-wrapper">
+                                    <button id="btn-detail-archive" title="アーカイブ操作" class="tab-item-btn">
+                                        <span>📦</span> <span id="btn-detail-archive-text" class="btn-text">アーカイブ</span>
+                                    </button>
+                                </div>
+                                <div class="tab-item-wrapper">
+                                    <button id="btn-delete-customer" title="データを完全に削除（消去）" class="tab-item-btn" style="color: #ff4d4d;">
+                                        <span>🗑️</span> <span class="btn-text">削除</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <button id="btn-close-detail" class="btn-close">×</button>
                         </div>
                     </div>
 
                     <!-- タブ切り替えボタン -->
-                    <div class="tab-container">
-                        <button class="tab-btn active" data-tab="visit-count">来店回数</button>
-                        <button class="tab-btn" data-tab="visit-type">施術内容</button>
-                        <button class="tab-btn" data-tab="visit-amount">金額</button>
-                        <button class="tab-btn" data-tab="personal-info">個人情報</button>
+                    <div class="tab-container tab-group-container">
+                        <div class="tab-item-wrapper">
+                            <button class="tab-btn tab-item-btn active" data-tab="visit-count" title="施術日・回数">
+                                <span class="tab-icon">🕒</span> <span class="tab-text">施術日</span>
+                            </button>
+                        </div>
+                        <div class="tab-item-wrapper">
+                            <button class="tab-btn tab-item-btn" data-tab="visit-calendar" title="施術カレンダー">
+                                <span class="tab-icon">🗓️</span> <span class="tab-text">カレンダー</span>
+                            </button>
+                        </div>
+                        <div class="tab-item-wrapper">
+                            <button class="tab-btn tab-item-btn" data-tab="visit-type" title="施術内容履歴">
+                                <span class="tab-icon">📋</span> <span class="tab-text">内容</span>
+                            </button>
+                        </div>
+                        <div class="tab-item-wrapper">
+                            <button class="tab-btn tab-item-btn" data-tab="visit-amount" title="売上・金額合計">
+                                <span class="tab-icon">💴</span> <span class="tab-text">金額</span>
+                            </button>
+                        </div>
+                        <div class="tab-item-wrapper">
+                            <button class="tab-btn tab-item-btn" data-tab="personal-info" title="顧客個人情報">
+                                <span class="tab-icon">👤</span> <span class="tab-text">情報</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- タブコンテンツ領域 -->
                     <div class="tab-content" id="tab-content-area">
                         <!-- 動的にコンテンツが挿入されます -->
+                    </div>
+
+                    <!-- [NEW] 個人カレンダー表示用コンテナ (タブコンテンツ領域の外に隠し持ち、必要に応じてレンダリング) -->
+                    <div id="customer-personal-calendar" style="display: none;">
+                        <div class="calendar-header" style="margin-bottom: 12px;">
+                            <button id="cust-calendar-prev" class="calendar-nav-btn" style="padding: 4px 10px;">&larr;</button>
+                            <div id="cust-calendar-title" class="calendar-title" style="font-size: 1rem;">2026年 7月</div>
+                            <button id="cust-calendar-next" class="calendar-nav-btn" style="padding: 4px 10px;">&rarr;</button>
+                        </div>
+                        <div class="calendar-grid" style="font-size: 0.75rem;">
+                            <div class="calendar-weekday">日</div>
+                            <div class="calendar-weekday">月</div>
+                            <div class="calendar-weekday">火</div>
+                            <div class="calendar-weekday">水</div>
+                            <div class="calendar-weekday">木</div>
+                            <div class="calendar-weekday">金</div>
+                            <div class="calendar-weekday">土</div>
+                        </div>
+                        <div class="calendar-grid" id="cust-calendar-grid-body"></div>
                     </div>
 
                     <!-- 新規記録を追加するボタン (カレンダー直結化により非表示) -->
@@ -227,22 +356,91 @@
                     <input type="date" id="input-birthday" class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>Soul Color (13色から最大5色・タップで選択／解除)</label>
-                    <div class="soul-color-selected-preview" id="input-soul-color-preview"></div>
-                    <div class="soul-color-selector" id="input-soul-color-container">
-                        <span class="color-chip red" data-color="red" title="レッド"></span>
-                        <span class="color-chip coral" data-color="coral" title="コーラル"></span>
-                        <span class="color-chip orange" data-color="orange" title="オレンジ"></span>
-                        <span class="color-chip gold" data-color="gold" title="ゴールド"></span>
-                        <span class="color-chip yellow" data-color="yellow" title="イエロー"></span>
-                        <span class="color-chip olive" data-color="olive" title="オリーブ"></span>
-                        <span class="color-chip green" data-color="green" title="グリーン"></span>
-                        <span class="color-chip turquoise" data-color="turquoise" title="ターコイズ"></span>
-                        <span class="color-chip blue" data-color="blue" title="ブルー"></span>
-                        <span class="color-chip royal-blue" data-color="royal-blue" title="ロイヤルブルー"></span>
-                        <span class="color-chip violet" data-color="violet" title="バイオレット"></span>
-                        <span class="color-chip magenta" data-color="magenta" title="マゼンタ"></span>
-                        <span class="color-chip clear" data-color="clear" title="クリア"></span>
+                    <label>Soul Color (5つのスロットから各色を選択してください)</label>
+                    <!-- スロット (5つの○) -->
+                    <div id="soul-color-slots" style="display: flex; gap: 12px; justify-content: center; margin: 12px 0;">
+                        <div class="soul-slot" data-slot="0" title="1色目" style="width: 48px; height: 48px; border-radius: 50%; border: 2px dashed var(--border-glass); cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative;">
+                            <span style="font-size: 0.7rem; color: var(--text-secondary);">1</span>
+                        </div>
+                        <div class="soul-slot" data-slot="1" title="2色目" style="width: 48px; height: 48px; border-radius: 50%; border: 2px dashed var(--border-glass); cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative;">
+                            <span style="font-size: 0.7rem; color: var(--text-secondary);">2</span>
+                        </div>
+                        <div class="soul-slot" data-slot="2" title="3色目" style="width: 48px; height: 48px; border-radius: 50%; border: 2px dashed var(--border-glass); cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative;">
+                            <span style="font-size: 0.7rem; color: var(--text-secondary);">3</span>
+                        </div>
+                        <div class="soul-slot" data-slot="3" title="4色目" style="width: 48px; height: 48px; border-radius: 50%; border: 2px dashed var(--border-glass); cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative;">
+                            <span style="font-size: 0.7rem; color: var(--text-secondary);">4</span>
+                        </div>
+                        <div class="soul-slot" data-slot="4" title="5色目" style="width: 48px; height: 48px; border-radius: 50%; border: 2px dashed var(--border-glass); cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative;">
+                            <span style="font-size: 0.7rem; color: var(--text-secondary);">5</span>
+                        </div>
+                    </div>
+                    
+                    <!-- カラーパレット (スロット選択時に表示) -->
+                    <div id="soul-color-palette" style="display: none; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); padding: 14px; border-radius: 16px; border: 1px solid var(--border-glass); margin-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span id="palette-target-label" style="font-size: 0.85rem; color: var(--accent-cyan); font-weight: 700;">スロット 1 の色を選択中</span>
+                            <button type="button" id="btn-close-palette" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-glass); color: var(--text-secondary); font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; cursor: pointer;">✕ 閉じる</button>
+                        </div>
+                        
+                        <!-- カラーパレットモード切り替え ＆ ハニカムパレット -->
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; gap: 8px; margin-bottom: 10px; border-bottom: 1px solid var(--border-glass); padding-bottom: 8px; flex-wrap: wrap;">
+                                <button type="button" id="tab-palette-preset" class="btn-palette-mode active" style="padding: 5px 12px; font-size: 0.75rem; border-radius: 6px; background: rgba(0, 242, 254, 0.2); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); font-weight: 700; cursor: pointer; transition: all 0.2s;">
+                                    ✨ Soul Color
+                                </button>
+                                <button type="button" id="tab-palette-honeycomb" class="btn-palette-mode" style="padding: 5px 12px; font-size: 0.75rem; border-radius: 6px; background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); border: 1px solid var(--border-glass); font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                    ⬡ ハニカムパレット
+                                </button>
+                            </div>
+
+                            <!-- Soul Color 12色 ＆ 任意カラーピッカー領域 -->
+                            <div id="preset-palette-view" style="display: block;">
+                                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px;">Soul Color（12色）から選択:</div>
+                                <div class="soul-color-selector" id="input-soul-color-container" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; max-height: 200px; overflow-y: auto;">
+                                    <!-- JSで動的にソウルカラーチップを生成 -->
+                                </div>
+                                <div style="margin-top: 8px;">
+                                    <label id="btn-custom-color-wrapper" style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; background: rgba(0, 242, 254, 0.12); border: 1px dashed var(--accent-cyan); cursor: pointer; font-size: 0.75rem; color: var(--accent-cyan); transition: all 0.2s;">
+                                        <span>🎨 カラーピッカーで直接指定</span>
+                                        <input type="color" id="input-custom-color-picker" style="opacity: 0; width: 0; height: 0; position: absolute; pointer-events: none;" value="#00f2fe">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- ハニカムカラーパレット領域 (画像スタイル) -->
+                            <div id="honeycomb-palette-view" style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 4px 0;">
+                                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px; text-align: center;">
+                                    マス目をタップすると色を選択できます
+                                </div>
+                                <div id="honeycomb-svg-wrapper" style="width: 100%; max-width: 290px; height: 225px; display: flex; justify-content: center; align-items: center; user-select: none; touch-action: manipulation;">
+                                    <!-- JSで動的にハニカムSVGを描画 -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- サンプル（プレビュー＆決定）領域 -->
+                        <div id="soul-color-preview-box" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);">タップした色のサンプルプレビュー</div>
+                            
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <div id="sample-color-circle" style="width: 52px; height: 52px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 16px rgba(0,242,254,0.3); background: #ef4444; transition: all 0.2s;"></div>
+                                <div>
+                                    <div id="sample-color-name" style="font-size: 0.95rem; font-weight: 700; color: #ffffff;">レッド</div>
+                                    <div id="sample-color-code" style="font-size: 0.75rem; color: var(--text-secondary);">#ef4444</div>
+                                </div>
+                            </div>
+
+                            <!-- アクションボタン -->
+                            <div style="display: flex; gap: 8px; width: 100%; justify-content: center; margin-top: 4px;">
+                                <button type="button" id="btn-apply-sample-color" style="flex: 1; max-width: 180px; padding: 8px 16px; background: linear-gradient(135deg, var(--accent-cyan), #00a8ff); border: none; border-radius: 8px; color: #000000; font-weight: 700; font-size: 0.85rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,242,254,0.3);">
+                                    ✓ この色で決定
+                                </button>
+                                <button type="button" id="btn-clear-slot" style="padding: 8px 12px; background: rgba(255,82,82,0.12); border: 1px solid #ff5252; color: #ff5252; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
+                                    色をクリア
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -259,17 +457,29 @@
                 </div>
             </form>
             <div style="display: flex; gap: 8px;">
-                <button type="button" id="btn-cancel-customer" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-primary); flex: 1;">キャンセル</button>
-                <button type="button" id="btn-submit-customer" class="btn-primary" style="flex: 1;">登録する</button>
+                <button type="button" id="btn-cancel-customer" class="btn-primary" title="キャンセル" style="background: rgba(255,255,255,0.05); color: var(--text-primary); flex: 1;">
+                    ✖️ <span class="btn-text">キャンセル</span>
+                </button>
+                <button type="button" id="btn-submit-customer" class="btn-primary" title="保存する" style="flex: 1;">
+                    ✅ <span class="btn-text">登録する</span>
+                </button>
             </div>
         </div>
     </div>
 
     <!-- レコード（施術・金額・来店日）追加モーダル -->
     <div class="modal-overlay" id="record-modal">
-        <div class="modal-content">
-            <h3 id="record-modal-title" style="font-size: 1.2rem; font-weight: 700; border-bottom: 1px solid var(--border-glass); padding-bottom: 8px;">施術内容・金額の記録</h3>
-            <form id="record-form" style="display: flex; flex-direction: column; gap: 12px; max-height: 65vh; overflow-y: auto; padding-right: 4px; margin-bottom: 8px;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 8px; margin-bottom: 12px;">
+                <h3 id="record-modal-title" style="font-size: 1.2rem; font-weight: 700; margin: 0;">施術内容・金額の記録</h3>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="record-draft-indicator" style="font-size: 0.7rem; color: var(--accent-cyan); opacity: 0; transition: opacity 0.3s;">⚡ 自動保存済</span>
+                    <button type="button" id="btn-toggle-edit-record" class="btn-secondary" title="編集を有効化" style="padding: 4px 12px; font-size: 0.8rem; display: none;">
+                        ✏️ <span class="btn-text">編集を有効にする</span>
+                    </button>
+                </div>
+            </div>
+            <form id="record-form" class="readonly-mode" style="display: flex; flex-direction: column; gap: 12px; max-height: 65vh; overflow-y: auto; padding-right: 4px; margin-bottom: 8px;">
                 <div class="form-group" id="record-customer-select-group" style="display: none;">
                     <label for="input-record-customer-id">対象顧客</label>
                     <select id="input-record-customer-id" class="form-control">
@@ -307,7 +517,9 @@
                 <div class="form-group">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                         <label for="select-plan" style="margin-bottom: 0;">施術プラン選択 (自動入力)</label>
-                        <button type="button" class="btn-manage-plans" style="background: rgba(0, 243, 255, 0.1); border: 1px solid rgba(0, 243, 255, 0.3); color: var(--accent-cyan); font-size: 0.75rem; cursor: pointer; padding: 4px 10px; border-radius: 6px;">プランを管理・編集</button>
+                        <button type="button" class="btn-manage-plans" title="プランを管理・編集" style="background: rgba(0, 243, 255, 0.1); border: 1px solid rgba(0, 243, 255, 0.3); color: var(--accent-cyan); font-size: 0.75rem; cursor: pointer; padding: 4px 10px; border-radius: 6px;">
+                            ⚙️ <span class="btn-text">プランを管理・編集</span>
+                        </button>
                     </div>
                     <select id="select-plan" class="form-control">
                         <!-- JSで動的にプランが挿入されます -->
@@ -335,8 +547,12 @@
                 </div>
             </form>
             <div style="display: flex; gap: 8px;">
-                <button type="button" id="btn-cancel-record" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-primary); flex: 1;">キャンセル</button>
-                <button type="button" id="btn-submit-record" class="btn-primary" style="flex: 1;">記録する</button>
+                <button type="button" id="btn-cancel-record" class="btn-primary" title="キャンセル" style="background: rgba(255,255,255,0.05); color: var(--text-primary); flex: 1;">
+                    ✖️ <span class="btn-text">キャンセル</span>
+                </button>
+                <button type="button" id="btn-submit-record" class="btn-primary" title="保存する" style="flex: 1;">
+                    📝 <span class="btn-text">記録する</span>
+                </button>
             </div>
         </div>
     </div>
@@ -373,13 +589,14 @@
                     </div>
 
                     <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 14px; border-radius: 12px;">
-                        <h4 style="margin: 0 0 6px 0; color: var(--accent-success); font-size: 1rem;">3. 📋 顧客カルテ詳細・4つのタブ</h4>
+                        <h4 style="margin: 0 0 6px 0; color: var(--accent-success); font-size: 1rem;">3. 📋 顧客カルテ詳細・5つのタブ</h4>
                         <p style="margin: 0; font-size: 0.88rem; color: var(--text-secondary);">
                             顧客カードをクリックすると右側にカルテが開きます。<br>
-                            ・<strong>来店回数</strong>: 通算回数・平均来店ペース（約N日ペース）を自動計算<br>
+                            ・<strong>来店回数</strong>: 通算回数・来店ペースを自動計算<br>
+                            ・<strong>カレンダー</strong>: 顧客専用の施術履歴カレンダー表示<br>
                             ・<strong>施術内容</strong>: 過去の施術名・訴え・処方・メモ一覧<br>
-                            ・<strong>金額</strong>: 累計お支払い額・平均客単価と施術内容明記<br>
-                            ・<strong>個人情報</strong>: 顧客No・連絡先等の基本データ
+                            ・<strong>金額</strong>: 累計お支払い額・客単価・履歴表示<br>
+                            ・<strong>個人情報</strong>: 連絡先等の基本データ
                         </p>
                     </div>
 
@@ -412,7 +629,7 @@
             🎬 ライブデモ実演中
         </span>
         <span id="live-demo-step-text" style="font-size: 0.9rem; color: #ffffff;">初期化中...</span>
-        <button id="btn-stop-live-tour" style="background: rgba(255, 82, 82, 0.2); border: 1px solid #ff5252; color: #ff5252; padding: 4px 12px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 0.8rem; margin-left: 8px;">
+        <button id="btn-stop-live-tour" style="background: #ff5252; color: #ffffff; padding: 4px 14px; border-radius: 20px; font-weight: 700; cursor: pointer; font-size: 0.8rem; border: none; margin-left: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
             ⏹ 停止する
         </button>
     </div>
@@ -432,26 +649,30 @@
                     <input type="text" id="new-plan-name" class="form-control" placeholder="プラン名（例：全身コース）">
                     <input type="number" id="new-plan-amount" class="form-control" placeholder="金額（例：8000）">
                     <textarea id="new-plan-description" class="form-control" placeholder="施術内容の説明・詳細" style="min-height: 60px;"></textarea>
-                    <button type="button" id="btn-add-new-plan" class="btn-primary" style="padding: 10px;">プランを追加保存</button>
+                    <button type="button" id="btn-add-new-plan" class="btn-primary" title="プランを追加" style="padding: 10px;">
+                        💾 <span class="btn-text">プランを追加保存</span>
+                    </button>
                 </div>
             </div>
 
             <div style="margin-top: 12px; flex-shrink: 0;">
-                <button type="button" id="btn-close-plan-modal" class="btn-primary" style="background: rgba(255,255,255,0.05); color: var(--text-primary); width: 100%;">閉じる</button>
+                <button type="button" id="btn-close-plan-modal" class="btn-primary" title="閉じる" style="background: rgba(255,255,255,0.05); color: var(--text-primary); width: 100%;">
+                    ✖️ <span class="btn-text">閉じる</span>
+                </button>
             </div>
         </div>
     </div>
 
     <!-- ⚠️ カスタム削除・確認モーダル -->
     <div class="modal-overlay" id="confirm-modal" style="z-index: 10000;">
-        <div class="modal-content" style="max-width: 400px; text-align: center; border: 1px solid rgba(255, 82, 82, 0.5); box-shadow: 0 10px 30px rgba(255, 82, 82, 0.25);">
-            <div style="font-size: 2.5rem; margin-bottom: 8px;">🗑️</div>
+        <div class="modal-content" id="confirm-modal-content" style="max-width: 400px; text-align: center; border: 1px solid rgba(255, 82, 82, 0.5); box-shadow: 0 10px 30px rgba(255, 82, 82, 0.25);">
+            <div id="confirm-modal-icon" style="font-size: 2.5rem; margin-bottom: 8px;">🗑️</div>
             <h3 id="confirm-modal-title" style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 1.2rem; font-weight: 700;">削除の確認</h3>
             <p id="confirm-modal-message" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5; white-space: pre-line;">本当に削除してもよろしいですか？</p>
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button type="button" id="btn-cancel-confirm" class="btn-secondary" style="flex: 1; padding: 10px; border-radius: 8px; font-weight: 600;">キャンセル</button>
                 <button type="button" id="btn-submit-confirm" style="flex: 1; padding: 10px; border-radius: 8px; background: #ff5252; color: #fff; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                    <span>🗑️</span> <span id="confirm-modal-action-text">削除する</span>
+                    <span id="confirm-modal-btn-icon">🗑️</span> <span id="confirm-modal-action-text">削除する</span>
                 </button>
             </div>
         </div>

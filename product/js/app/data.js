@@ -5,19 +5,18 @@ export const MAX_SOUL_COLORS = 5;
 
 // 選択可能なソウルカラー（表示順）。UI側のチップ生成もこの定義を正本とする。
 export const SOUL_COLOR_DEFS = [
-    { key: 'red', label: 'レッド' },
-    { key: 'coral', label: 'コーラル' },
-    { key: 'orange', label: 'オレンジ' },
-    { key: 'gold', label: 'ゴールド' },
-    { key: 'yellow', label: 'イエロー' },
-    { key: 'olive', label: 'オリーブ' },
-    { key: 'green', label: 'グリーン' },
-    { key: 'turquoise', label: 'ターコイズ' },
-    { key: 'blue', label: 'ブルー' },
-    { key: 'royal-blue', label: 'ロイヤルブルー' },
-    { key: 'violet', label: 'バイオレット' },
-    { key: 'magenta', label: 'マゼンタ' },
-    { key: 'clear', label: 'クリア' },
+    { key: '1-red', emoji: '🔴', name: '赤', code: '#ef4444' },
+    { key: '2-blue', emoji: '🔵', name: '青', code: '#3b82f6' },
+    { key: '3-yellow', emoji: '🟡', name: '黄', code: '#facc15' },
+    { key: '4-green', emoji: '🟢', name: '緑', code: '#22c55e' },
+    { key: '5-turquoise', emoji: '🐬', name: 'ターコイズ', code: '#06b6d4' },
+    { key: '6-pink', emoji: '💖', name: 'ピンク', code: '#f472b6' },
+    { key: '7-purple', emoji: '🟣', name: '紫', code: '#a855f7' },
+    { key: '8-orange', emoji: '🍊', name: 'オレンジ', code: '#f97316' },
+    { key: '9-magenta', emoji: '💖', name: 'マゼンタピンク', code: '#d946ef' },
+    { key: '11-indigo', emoji: '💙', name: 'インディゴ', code: '#4f46e5' },
+    { key: '22-olive', emoji: '🫒', name: 'オリーブグリーン', code: '#84cc16' },
+    { key: '33-evolved-pink', emoji: '💞', name: '進化系pink', code: 'linear-gradient(135deg, #ff66c4 0%, #f43f5e 100%)' },
 ];
 
 /**
@@ -321,3 +320,77 @@ export function deletePlan(id) {
     savePlans(filtered);
     return filtered;
 }
+
+// -------------------------------------------------------------------
+// [ISSUE-NEW] カラーマスター設定（サロン/セラピスト独自定義カラー）管理
+// -------------------------------------------------------------------
+export const INITIAL_COLOR_MASTERS = [
+    { id: 'cm-1-red', name: '赤', code: '#ef4444' },
+    { id: 'cm-2-blue', name: '青', code: '#3b82f6' },
+    { id: 'cm-3-yellow', name: '黄', code: '#facc15' },
+    { id: 'cm-4-green', name: '緑', code: '#22c55e' },
+    { id: 'cm-5-turquoise', name: 'ターコイズ', code: '#06b6d4' },
+    { id: 'cm-6-pink', name: 'ピンク', code: '#f472b6' },
+    { id: 'cm-7-purple', name: '紫', code: '#a855f7' },
+    { id: 'cm-8-orange', name: 'オレンジ', code: '#f97316' },
+    { id: 'cm-9-magenta', name: 'マゼンタピンク', code: '#d946ef' },
+    { id: 'cm-11-indigo', name: 'インディゴ', code: '#4f46e5' },
+    { id: 'cm-22-olive', name: 'オリーブグリーン', code: '#84cc16' },
+    { id: 'cm-33-evolved-pink', name: '進化系pink', code: 'linear-gradient(135deg, #ff66c4 0%, #f43f5e 100%)' }
+];
+
+export function getColorMasters() {
+    const data = localStorage.getItem('therapist_color_masters');
+    if (!data) {
+        return INITIAL_COLOR_MASTERS;
+    }
+    try {
+        const colors = JSON.parse(data);
+        return Array.isArray(colors) && colors.length > 0 ? colors : INITIAL_COLOR_MASTERS;
+    } catch (e) {
+        return INITIAL_COLOR_MASTERS;
+    }
+}
+
+export function saveColorMasters(colors) {
+    try {
+        localStorage.setItem('therapist_color_masters', JSON.stringify(colors));
+    } catch (e) {
+        console.warn('LocalStorage write blocked.', e);
+    }
+}
+
+export function addColorMaster(name, code) {
+    const colors = getColorMasters();
+    const newColor = {
+        id: `cm-${Date.now().toString(36)}`,
+        name: name || 'カスタムカラー',
+        code: code || '#00f2fe'
+    };
+    colors.push(newColor);
+    saveColorMasters(colors);
+    return newColor;
+}
+
+export function updateColorMaster(id, name, code) {
+    const colors = getColorMasters();
+    const index = colors.findIndex(c => c.id === id);
+    if (index !== -1) {
+        colors[index] = {
+            ...colors[index],
+            name: name || colors[index].name,
+            code: code || colors[index].code
+        };
+        saveColorMasters(colors);
+        return colors[index];
+    }
+    return null;
+}
+
+export function deleteColorMaster(id) {
+    const colors = getColorMasters();
+    const filtered = colors.filter(c => c.id !== id);
+    saveColorMasters(filtered);
+    return filtered;
+}
+
